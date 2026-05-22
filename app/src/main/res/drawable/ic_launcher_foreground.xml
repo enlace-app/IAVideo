@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    
+    <!-- AI Halo glow behind the icon -->
+    <path
+        android:fillColor="#15132B"
+        android:pathData="M54,54m-33,0a33,33 0,1 1,66 0a33,33 0,1 1,-66 0" />
+
+    <!-- Glow details -->
+    <path
+        android:fillColor="#1F22D3EE"
+        android:pathData="M54,54m-25,0a25,25 0,1 1,50 0a25,25 0,1 1,-50 0" />
+
+    <!-- Camera Body (centered in safety 66dp zone, dimensions around 32 to 74) -->
+    <path
+        android:fillColor="#FBBF24"
+        android:pathData="M38,36h20c3.3,0 6,2.7 6,6v24c0,3.3 -2.7,6 -6,6H38c-3.3,0 -6,-2.7 -6,-6V42c0,-3.3 2.7,-6 6,-6z" />
+        
+    <!-- Video Reels elements -->
+    <path
+        android:fillColor="#0F0E17"
+        android:pathData="M43,48m-5,0a5,5 0,1 1,10 0a5,5 0,1 1,-10 0" />
+    <path
+        android:fillColor="#0F0E17"
+        android:pathData="M55,48m-5,0a5,5 0,1 1,10 0a5,5 0,1 1,-10 0" />
+    <path
+        android:fillColor="#0F0E17"
+        android:pathData="M49,60m-5,0a5,5 0,1 1,10 0a5,5 0,1 1,-10 0" />
+
+    <path
+        android:fillColor="#FBBF24"
+        android:pathData="M43,48m-2,0a2,2 0,1 1,4 0a2,2 0,1 1,-4 0" />
+    <path
+        android:fillColor="#FBBF24"
+        android:pathData="M55,48m-2,0a2,2 0,1 1,4 0a2,2 0,1 1,-4 0" />
+    <path
+        android:fillColor="#FBBF24"
+        android:pathData="M49,60m-2,0a2,2 0,1 1,4 0a2,2 0,1 1,-4 0" />
+
+    <!-- Movie projection cone (Cyber Neon Cyan color) -->
+    <path
+        android:fillColor="#22D3EE"
+        android:pathData="M64,44l16,-10v40l-16,-10z" />
+        
+    <!-- AI sparkles / shining magic stars -->
+    <path
+        android:fillColor="#F43F5E"
+        android:pathData="M78,28l2.5,5l5,2.5l-5,2.5l-2.5,5l-2.5,-5l-5,-2.5l5,-2.5z" />
+    
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M28,68l1.5,3l3,1.5l-3,1.5l-1.5,3l-1.5,-3l-3,-1.5l3,-1.5z" />
+</vector>
