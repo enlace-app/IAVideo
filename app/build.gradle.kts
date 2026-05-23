@@ -5,6 +5,10 @@ plugins {
   alias(libs.plugins.secrets)
 }
 
+kotlin {
+  jvmToolchain(11)
+}
+
 android {
   namespace = "com.example"
   // âœ… Sintaxis estÃ¡ndar compatible con AGP 8.7.0
@@ -42,10 +46,6 @@ android {
   compileOptions {
     sourceCompatibility = JavaVersion.VERSION_11
     targetCompatibility = JavaVersion.VERSION_11
-  }
-
-  kotlinOptions {
-    jvmTarget = "11"
   }
 
   buildFeatures {
