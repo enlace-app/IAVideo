@@ -25,18 +25,11 @@ jobs:
       - name: Crear archivo .env con la API key
         run: echo "GEMINI_API_KEY=${{ secrets.GEMINI_API_KEY }}" > .env
 
-      - name: Descargar e instalar Gradle 9.3.1
+      - name: Descargar e instalar Gradle 8.9
         run: |
-          wget -q https://services.gradle.org/distributions/gradle-9.3.1-bin.zip -O /tmp/gradle.zip
+          wget -q https://services.gradle.org/distributions/gradle-8.9-bin.zip -O /tmp/gradle.zip
           unzip -q /tmp/gradle.zip -d /opt/gradle
-          echo "/opt/gradle/gradle-9.3.1/bin" >> $GITHUB_PATH
-
-      - name: Crear gradle-wrapper.jar desde Gradle instalado
-        run: |
-          mkdir -p gradle/wrapper
-          cp /opt/gradle/gradle-9.3.1/lib/plugins/gradle-wrapper-*.jar gradle/wrapper/gradle-wrapper.jar 2>/dev/null || \
-          find /opt/gradle -name "gradle-wrapper*.jar" -exec cp {} gradle/wrapper/gradle-wrapper.jar \;
-          chmod +x gradlew
+          echo "/opt/gradle/gradle-8.9/bin" >> $GITHUB_PATH
 
       - name: Compilar APK debug
         run: gradle assembleDebug
