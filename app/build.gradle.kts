@@ -5,13 +5,8 @@ plugins {
   alias(libs.plugins.secrets)
 }
 
-kotlin {
-  jvmToolchain(11)
-}
-
 android {
   namespace = "com.example"
-  // âœ… Sintaxis estÃ¡ndar compatible con AGP 8.7.0
   compileSdk = 35
 
   defaultConfig {
@@ -34,7 +29,6 @@ android {
 
   buildTypes {
     release {
-      isCrunchPngs = false
       isMinifyEnabled = false
       proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
     }
@@ -80,7 +74,6 @@ dependencies {
   implementation(libs.androidx.lifecycle.viewmodel.compose)
   implementation(libs.androidx.room.ktx)
   implementation(libs.androidx.room.runtime)
-  // âœ… Coil para imÃ¡genes desde URL (Fase 3)
   implementation(libs.coil.compose)
   implementation(libs.converter.moshi)
   implementation(libs.kotlinx.coroutines.android)
