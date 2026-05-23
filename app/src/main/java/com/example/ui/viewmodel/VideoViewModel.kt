@@ -20,6 +20,7 @@ import com.example.data.model.SubtitleSegmentEntity
 import com.example.data.repository.VideoRepository
 import com.example.ui.audio.AudioSynthesizer
 import com.example.ui.audio.NarrationManager
+import com.example.ui.video.VideoExporter
 import com.squareup.moshi.Moshi
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
@@ -30,6 +31,8 @@ class VideoViewModel(application: Application) : AndroidViewModel(application) {
     private val synthesizer = AudioSynthesizer()
     // ✅ FASE 4: Motor de narración con Android TTS
     private val narrationManager = NarrationManager(application)
+    // ✅ FASE 5: Exportador real de video MP4
+    private val videoExporter = VideoExporter(application)
 
     // Public list of all saved projects
     val allProjects: StateFlow<List<VideoProjectEntity>> = repository.allProjects
@@ -456,42 +459,32 @@ class VideoViewModel(application: Application) : AndroidViewModel(application) {
         )
     }
 
-    // AI Render & Video Producer compilation mockup
+    // ✅ FASE 5: Exportación real de video MP4 con MediaCodec + MediaMuxer
     fun renderAndExportVideo(onCompleted: () -> Unit) {
         val full = currentProject.value ?: return
         pause()
         isExporting.value = true
         exportProgress.value = 0f
-        exportStep.value = "Iniciando codificadores de video..."
+        exportStep.value = "Preparando exportación..."
 
         viewModelScope.launch {
-            val steps = listOf(
-                "Iniciando codificadores de video..." to 0.1f,
-                "Renderizando escenas 3D interpoladas por IA..." to 0.3f,
-                "Compilando subtítulos con algoritmo dynamic karaoke..." to 0.6f,
-                "Mezclando pistas de música sintética de fondo..." to 0.8f,
-                "Inyectando metadatos MP4 y finalizando contenedor de video..." to 0.95f,
-                "Video exportado con éxito a la galería." to 1.0f
-            )
-
-            for ((stepMsg, progressValue) in steps) {
-                exportStep.value = stepMsg
-                // Simulate frame recording timeline step
-                val currentP = exportProgress.value
-                val stepDiff = progressValue - currentP
-                val ticks = 10
-                for (t in 1..ticks) {
-                    delay(120) // Frame render simulator ticks
-                    exportProgress.value = currentP + (stepDiff * t / ticks)
-                }
+            val savedPath = videoExporter.export(full) { progress ->
+                exportStep.value = progress.step
+                exportProgress.value = progress.progress
             }
 
-            // Flag exported database state
-            val updatedProj = full.project.copy(isExported = true)
+            // Actualizar estado en base de datos
+            val updatedProj = full.project.copy(isExported = savedPath != null)
             repository.updateProject(updatedProj)
             currentProject.value = full.copy(project = updatedProj)
 
-            delay(600)
+            exportStep.value = if (savedPath != null) {
+                "¡Video guardado en la Galería!"
+            } else {
+                "Error al exportar. Comprueba tu conexión e inténtalo de nuevo."
+            }
+
+            kotlinx.coroutines.delay(1500)
             isExporting.value = false
             onCompleted()
         }
