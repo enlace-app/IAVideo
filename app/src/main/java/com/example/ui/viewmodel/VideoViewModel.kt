@@ -19,6 +19,7 @@ import com.example.data.model.SceneEntity
 import com.example.data.model.SubtitleSegmentEntity
 import com.example.data.repository.VideoRepository
 import com.example.ui.audio.AudioSynthesizer
+import com.example.ui.audio.NarrationManager
 import com.squareup.moshi.Moshi
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
@@ -27,6 +28,8 @@ class VideoViewModel(application: Application) : AndroidViewModel(application) {
     private val database = AppDatabase.getDatabase(application)
     private val repository = VideoRepository(database.videoProjectDao())
     private val synthesizer = AudioSynthesizer()
+    // ✅ FASE 4: Motor de narración con Android TTS
+    private val narrationManager = NarrationManager(application)
 
     // Public list of all saved projects
     val allProjects: StateFlow<List<VideoProjectEntity>> = repository.allProjects
@@ -63,6 +66,7 @@ class VideoViewModel(application: Application) : AndroidViewModel(application) {
                 val proj = currentProject.value
                 if (playing && proj != null) {
                     synthesizer.setVolume(proj.project.musicVolume)
+                    narrationManager.setVolume(proj.project.voiceVolume)
                     val notes = proj.project.backgroundMusic.let { getNotesForGenre(it) }
                     val tempo = when (proj.project.backgroundMusic) {
                         "Techno Pulse" -> "FAST"
@@ -70,9 +74,15 @@ class VideoViewModel(application: Application) : AndroidViewModel(application) {
                         else -> "MEDIUM"
                     }
                     synthesizer.startPlaying(notes, tempo)
+                    // ✅ Narrar la escena activa al comenzar reproducción
+                    val activeScene = proj.scenes.getOrNull(activeSceneIndex.value)
+                    if (activeScene != null && activeScene.narrationScript.isNotBlank()) {
+                        narrationManager.speak(activeScene.narrationScript)
+                    }
                     startPlaybackTicker()
                 } else {
                     synthesizer.stopPlaying()
+                    narrationManager.pause()
                     stopPlaybackTicker()
                 }
             }
@@ -174,7 +184,15 @@ class VideoViewModel(application: Application) : AndroidViewModel(application) {
             accumMs += scene.durationMs
             foundSceneIdx = idx
         }
+        // ✅ Si cambia la escena, narrar el nuevo script
+        val previousIdx = activeSceneIndex.value
         activeSceneIndex.value = foundSceneIdx
+        if (foundSceneIdx != previousIdx && isPlaying.value) {
+            val scene = proj.scenes.getOrNull(foundSceneIdx)
+            if (scene != null && scene.narrationScript.isNotBlank()) {
+                narrationManager.speak(scene.narrationScript)
+            }
+        }
 
         // Determine active subtitle segment
         val activeSub = proj.subtitles.firstOrNull { sub ->
@@ -482,6 +500,7 @@ class VideoViewModel(application: Application) : AndroidViewModel(application) {
     override fun onCleared() {
         super.onCleared()
         synthesizer.stopPlaying()
+        narrationManager.shutdown() // ✅ Liberar motor TTS
         stopPlaybackTicker()
     }
 }
