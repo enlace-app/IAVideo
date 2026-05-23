@@ -25,13 +25,14 @@ jobs:
       - name: Crear archivo .env con la API key
         run: echo "GEMINI_API_KEY=${{ secrets.GEMINI_API_KEY }}" > .env
 
-      - name: Instalar Gradle 9.3.1
+      - name: Configurar Gradle
         uses: gradle/actions/setup-gradle@v4
-        with:
-          gradle-version: '9.3.1'
+
+      - name: Dar permisos a gradlew
+        run: chmod +x gradlew
 
       - name: Compilar APK debug
-        run: gradle assembleDebug
+        run: ./gradlew assembleDebug
 
       - name: Subir APK como artefacto descargable
         uses: actions/upload-artifact@v4
