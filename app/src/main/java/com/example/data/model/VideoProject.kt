@@ -11,13 +11,13 @@ data class VideoProjectEntity(
     val title: String,
     val prompt: String,
     val createdTime: Long = System.currentTimeMillis(),
-    val backgroundMusic: String = "Retro Beats", // "Retro Beats", "Lo-Fi Lounge", "Cinematic Orchestral", "Ambient Waves", "Techno Pulse"
+    val backgroundMusic: String = "Retro Beats",
     val musicVolume: Float = 0.5f,
     val voiceVolume: Float = 0.8f,
-    val subtitleColor: String = "#FFEB3B", // Material Yellow
-    val subtitleFamily: String = "IMPACT", // "IMPACT", "DISPLAY", "MONO", "SANS"
-    val subtitleStyle: String = "OUTLINE", // "OUTLINE", "BACKGROUND", "NONE"
-    val subtitleLocation: String = "BOTTOM", // "TOP", "CENTER", "BOTTOM"
+    val subtitleColor: String = "#FFEB3B",
+    val subtitleFamily: String = "IMPACT",
+    val subtitleStyle: String = "OUTLINE",
+    val subtitleLocation: String = "BOTTOM",
     val isExported: Boolean = false,
     val durationSeconds: Int = 30
 )
@@ -38,11 +38,14 @@ data class SceneEntity(
     @PrimaryKey(autoGenerate = true) val id: Int = 0,
     val projectId: Int,
     val sequenceIndex: Int,
-    val visualCaption: String, // Decrypted video summary scene description
-    val aiImagePrompt: String, // Best prompt to describe the scene
-    val narrationScript: String, // Text narrated by speaker during this scene
+    val visualCaption: String,
+    val aiImagePrompt: String,
+    val narrationScript: String,
     val durationMs: Int,
-    val transitionEffect: String = "SLIDE" // "FADE", "ZOOM", "SLIDE"
+    val transitionEffect: String = "SLIDE",
+    // ✅ NUEVO: URL de la imagen generada por Pollinations.ai
+    // Se rellena automáticamente al crear el proyecto, null hasta que cargue
+    val generatedImageUrl: String? = null
 )
 
 @Entity(
