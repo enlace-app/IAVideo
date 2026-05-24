@@ -25,11 +25,11 @@ jobs:
       - name: Crear archivo .env con la API key
         run: echo "GEMINI_API_KEY=${{ secrets.GEMINI_API_KEY }}" > .env
 
-      - name: Descargar e instalar Gradle 8.9
+      - name: Descargar e instalar Gradle 8.11.1
         run: |
-          wget -q https://services.gradle.org/distributions/gradle-8.9-bin.zip -O /tmp/gradle.zip
+          wget -q https://services.gradle.org/distributions/gradle-8.11.1-bin.zip -O /tmp/gradle.zip
           unzip -q /tmp/gradle.zip -d /opt/gradle
-          echo "/opt/gradle/gradle-8.9/bin" >> $GITHUB_PATH
+          echo "/opt/gradle/gradle-8.11.1/bin" >> $GITHUB_PATH
 
       - name: Compilar APK debug
         run: gradle assembleDebug --no-configuration-cache --no-daemon
