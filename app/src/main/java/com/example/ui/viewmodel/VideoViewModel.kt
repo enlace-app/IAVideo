@@ -1,6 +1,7 @@
 package com.example.ui.viewmodel
 
 import android.app.Application
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.BuildConfig
@@ -483,5 +484,12 @@ class VideoViewModel(application: Application) : AndroidViewModel(application) {
         super.onCleared()
         synthesizer.stopPlaying()
         stopPlaybackTicker()
+    }
+
+    companion object {
+        // ✅ Factory necesario para AndroidViewModel con Application
+        fun factory(application: Application): ViewModelProvider.Factory {
+            return ViewModelProvider.AndroidViewModelFactory.getInstance(application)
+        }
     }
 }
