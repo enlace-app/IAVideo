@@ -18,22 +18,10 @@ android {
     testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
   }
 
-  signingConfigs {
-    create("debugConfig") {
-      storeFile = file("${rootDir}/debug.keystore")
-      storePassword = "android"
-      keyAlias = "androiddebugkey"
-      keyPassword = "android"
-    }
-  }
-
   buildTypes {
     release {
       isMinifyEnabled = false
       proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
-    }
-    debug {
-      signingConfig = signingConfigs.getByName("debugConfig")
     }
   }
 
@@ -45,12 +33,6 @@ android {
   buildFeatures {
     compose = true
     buildConfig = true
-  }
-
-  testOptions {
-    unitTests {
-      isIncludeAndroidResources = true
-    }
   }
 }
 
@@ -84,7 +66,6 @@ dependencies {
   implementation(libs.retrofit)
 
   testImplementation(libs.junit)
-  testImplementation(libs.kotlinx.coroutines.test)
   androidTestImplementation(platform(libs.androidx.compose.bom))
   androidTestImplementation(libs.androidx.espresso.core)
   androidTestImplementation(libs.androidx.junit)
