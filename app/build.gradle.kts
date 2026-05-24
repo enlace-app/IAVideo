@@ -16,6 +16,8 @@ android {
     versionCode = 1
     versionName = "1.0"
     testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+    // âœ… Valor por defecto si no existe el .env
+    buildConfigField("String", "GEMINI_API_KEY", "\"\"")
   }
 
   buildTypes {
@@ -23,7 +25,6 @@ android {
       isMinifyEnabled = false
       proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
     }
-    // âœ… Debug usa el keystore por defecto de Android â€” sin archivo externo
     debug {}
   }
 
