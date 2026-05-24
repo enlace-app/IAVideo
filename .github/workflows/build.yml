@@ -23,7 +23,9 @@ jobs:
         uses: android-actions/setup-android@v3
 
       - name: Crear archivo .env con la API key
-        run: echo "GEMINI_API_KEY=${{ secrets.GEMINI_API_KEY }}" > .env
+        run: |
+          echo "GEMINI_API_KEY=${{ secrets.GEMINI_API_KEY }}" > .env
+          echo "GEMINI_API_KEY=${{ secrets.GEMINI_API_KEY }}" > .env.example
 
       - name: Descargar e instalar Gradle 8.11.1
         run: |
