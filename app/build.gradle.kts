@@ -23,6 +23,8 @@ android {
       isMinifyEnabled = false
       proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
     }
+    // âœ… Debug usa el keystore por defecto de Android â€” sin archivo externo
+    debug {}
   }
 
   compileOptions {
