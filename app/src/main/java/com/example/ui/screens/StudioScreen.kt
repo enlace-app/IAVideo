@@ -39,11 +39,6 @@ import com.example.data.model.SubtitleSegmentEntity
 import com.example.data.model.VideoProjectEntity
 import com.example.ui.viewmodel.VideoViewModel
 import kotlin.math.sin
-import coil.compose.AsyncImage
-import coil.compose.SubcomposeAsyncImage
-import coil.request.ImageRequest
-import androidx.compose.ui.platform.LocalContext
-import com.example.data.api.PollinationsImageService
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -516,70 +511,30 @@ fun VideoMonitorScreen(
                     )
                 }
 
-                // ✅ FASE 3: Imagen real generada por Pollinations.ai
-                Box(
+                // AI Generated Caption (representing active scene frames)
+                Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .weight(1f),
-                    contentAlignment = Alignment.Center
+                        .weight(1f)
+                        .padding(horizontal = 24.dp, vertical = 12.dp),
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    val imageUrl = remember(activeScene.sequenceIndex, activeScene.aiImagePrompt) {
-                        PollinationsImageService.getImageUrl(
-                            prompt = activeScene.aiImagePrompt,
-                            seed = activeScene.sequenceIndex
-                        )
-                    }
-                    SubcomposeAsyncImage(
-                        model = ImageRequest.Builder(LocalContext.current)
-                            .data(imageUrl)
-                            .crossfade(true)
-                            .build(),
-                        contentDescription = activeScene.visualCaption,
-                        modifier = Modifier.fillMaxSize(),
-                        loading = {
-                            Box(
-                                modifier = Modifier.fillMaxSize(),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Column(
-                                    horizontalAlignment = Alignment.CenterHorizontally,
-                                    verticalArrangement = Arrangement.Center
-                                ) {
-                                    CircularProgressIndicator(
-                                        color = neonCyan,
-                                        modifier = Modifier.size(32.dp),
-                                        strokeWidth = 2.dp
-                                    )
-                                    Spacer(modifier = Modifier.height(8.dp))
-                                    Text(
-                                        text = activeScene.visualCaption,
-                                        fontSize = 13.sp,
-                                        color = Color.White.copy(alpha = 0.7f),
-                                        textAlign = TextAlign.Center,
-                                        fontStyle = FontStyle.Italic,
-                                        modifier = Modifier.padding(horizontal = 16.dp)
-                                    )
-                                }
-                            }
-                        },
-                        error = {
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxSize()
-                                    .background(Color(0xFF1E1B4B)),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Text(
-                                    text = activeScene.visualCaption,
-                                    fontSize = 14.sp,
-                                    color = Color.White,
-                                    fontWeight = FontWeight.Medium,
-                                    textAlign = TextAlign.Center,
-                                    fontStyle = FontStyle.Italic,
-                                    modifier = Modifier.padding(horizontal = 20.dp)
-                                )
-                            }
-                        }
+                    Text(
+                        text = activeScene.visualCaption,
+                        fontSize = 15.sp,
+                        color = Color.White,
+                        fontWeight = FontWeight.Medium,
+                        textAlign = TextAlign.Center,
+                        fontStyle = FontStyle.Italic
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = "Prompt: ${activeScene.aiImagePrompt}",
+                        fontSize = 10.sp,
+                        color = Color.LightGray.copy(alpha = 0.7f),
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.alpha(0.8f)
                     )
                 }
 

@@ -2,9 +2,8 @@ package com.example.data.api
 
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
+import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
-import okhttp3.logging.HttpLoggingInterceptor
-import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
 import retrofit2.http.Body
@@ -77,9 +76,9 @@ data class AiGeneratedSubtitle(
 
 @JsonClass(generateAdapter = true)
 data class AiGeneratedMusic(
-    @Json(name = "genre") val genre: String,
-    @Json(name = "tempo") val tempo: String,
-    @Json(name = "synthNotes") val synthNotes: String
+    @Json(name = "genre") val genre: String, // "Retro Beats", "Lo-Fi Lounge", "Cinematic Orchestral", "Ambient Waves", "Techno Pulse"
+    @Json(name = "tempo") val tempo: String, // "SLOW", "MEDIUM", "FAST"
+    @Json(name = "synthNotes") val synthNotes: String // Note list like "C4,E4,G4,B4,C5"
 )
 
 @JsonClass(generateAdapter = true)
@@ -91,34 +90,21 @@ data class AiVideoResponse(
     @Json(name = "subtitles") val subtitles: List<AiGeneratedSubtitle>
 )
 
-// Sealed class para manejar resultados de red con claridad
-sealed class ApiResult<out T> {
-    data class Success<T>(val data: T) : ApiResult<T>()
-    data class Error(val code: Int, val message: String) : ApiResult<Nothing>()
-    data class NetworkError(val exception: Exception) : ApiResult<Nothing>()
-}
-
 interface GeminiVideoService {
-    // ✅ Corregido: modelo real disponible en la API de Google
-    @POST("v1beta/models/gemini-2.0-flash:generateContent")
+    @POST("v1beta/models/gemini-3.5-flash:generateContent")
     suspend fun generateContent(
         @Query("key") apiKey: String,
         @Body request: GenerateContentRequest
-    ): Response<GenerateContentResponse>
+    ): GenerateContentResponse
 }
 
 object RetrofitClient {
     private const val BASE_URL = "https://generativelanguage.googleapis.com/"
 
-    private val loggingInterceptor = HttpLoggingInterceptor().apply {
-        level = HttpLoggingInterceptor.Level.BODY
-    }
-
     private val okHttpClient = OkHttpClient.Builder()
-        .connectTimeout(90, TimeUnit.SECONDS)
-        .readTimeout(90, TimeUnit.SECONDS)
-        .writeTimeout(90, TimeUnit.SECONDS)
-        .addInterceptor(loggingInterceptor)
+        .connectTimeout(60, TimeUnit.SECONDS)
+        .readTimeout(60, TimeUnit.SECONDS)
+        .writeTimeout(60, TimeUnit.SECONDS)
         .build()
 
     val service: GeminiVideoService by lazy {
@@ -129,36 +115,5 @@ object RetrofitClient {
             .addConverterFactory(MoshiConverterFactory.create(moshi))
             .build()
         retrofit.create(GeminiVideoService::class.java)
-    }
-
-    // Función helper para ejecutar llamadas con manejo de errores automático
-    suspend fun <T> safeApiCall(call: suspend () -> Response<T>): ApiResult<T> {
-        return try {
-            val response = call()
-            if (response.isSuccessful) {
-                val body = response.body()
-                if (body != null) {
-                    ApiResult.Success(body)
-                } else {
-                    ApiResult.Error(response.code(), "Respuesta vacía del servidor")
-                }
-            } else {
-                val errorMsg = when (response.code()) {
-                    400 -> "Solicitud inválida. Revisa el prompt."
-                    401 -> "API Key inválida. Ve a Ajustes y comprueba tu clave Gemini."
-                    403 -> "Acceso denegado. Verifica los permisos de tu API Key."
-                    429 -> "Límite de peticiones alcanzado. Espera un momento e intenta de nuevo."
-                    500, 503 -> "Error en los servidores de Google. Intenta más tarde."
-                    else -> "Error ${response.code()}: ${response.message()}"
-                }
-                ApiResult.Error(response.code(), errorMsg)
-            }
-        } catch (e: java.net.UnknownHostException) {
-            ApiResult.NetworkError(Exception("Sin conexión a internet. Comprueba tu red."))
-        } catch (e: java.net.SocketTimeoutException) {
-            ApiResult.NetworkError(Exception("Tiempo de espera agotado. La red es lenta, intenta de nuevo."))
-        } catch (e: Exception) {
-            ApiResult.NetworkError(e)
-        }
     }
 }

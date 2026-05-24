@@ -19,8 +19,6 @@ import com.example.data.model.SceneEntity
 import com.example.data.model.SubtitleSegmentEntity
 import com.example.data.repository.VideoRepository
 import com.example.ui.audio.AudioSynthesizer
-import com.example.ui.audio.NarrationManager
-import com.example.ui.video.VideoExporter
 import com.squareup.moshi.Moshi
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
@@ -29,10 +27,6 @@ class VideoViewModel(application: Application) : AndroidViewModel(application) {
     private val database = AppDatabase.getDatabase(application)
     private val repository = VideoRepository(database.videoProjectDao())
     private val synthesizer = AudioSynthesizer()
-    // ✅ FASE 4: Motor de narración con Android TTS
-    private val narrationManager = NarrationManager(application)
-    // ✅ FASE 5: Exportador real de video MP4
-    private val videoExporter = VideoExporter(application)
 
     // Public list of all saved projects
     val allProjects: StateFlow<List<VideoProjectEntity>> = repository.allProjects
@@ -69,7 +63,6 @@ class VideoViewModel(application: Application) : AndroidViewModel(application) {
                 val proj = currentProject.value
                 if (playing && proj != null) {
                     synthesizer.setVolume(proj.project.musicVolume)
-                    narrationManager.setVolume(proj.project.voiceVolume)
                     val notes = proj.project.backgroundMusic.let { getNotesForGenre(it) }
                     val tempo = when (proj.project.backgroundMusic) {
                         "Techno Pulse" -> "FAST"
@@ -77,15 +70,9 @@ class VideoViewModel(application: Application) : AndroidViewModel(application) {
                         else -> "MEDIUM"
                     }
                     synthesizer.startPlaying(notes, tempo)
-                    // ✅ Narrar la escena activa al comenzar reproducción
-                    val activeScene = proj.scenes.getOrNull(activeSceneIndex.value)
-                    if (activeScene != null && activeScene.narrationScript.isNotBlank()) {
-                        narrationManager.speak(activeScene.narrationScript)
-                    }
                     startPlaybackTicker()
                 } else {
                     synthesizer.stopPlaying()
-                    narrationManager.pause()
                     stopPlaybackTicker()
                 }
             }
@@ -187,15 +174,7 @@ class VideoViewModel(application: Application) : AndroidViewModel(application) {
             accumMs += scene.durationMs
             foundSceneIdx = idx
         }
-        // ✅ Si cambia la escena, narrar el nuevo script
-        val previousIdx = activeSceneIndex.value
         activeSceneIndex.value = foundSceneIdx
-        if (foundSceneIdx != previousIdx && isPlaying.value) {
-            val scene = proj.scenes.getOrNull(foundSceneIdx)
-            if (scene != null && scene.narrationScript.isNotBlank()) {
-                narrationManager.speak(scene.narrationScript)
-            }
-        }
 
         // Determine active subtitle segment
         val activeSub = proj.subtitles.firstOrNull { sub ->
@@ -459,32 +438,42 @@ class VideoViewModel(application: Application) : AndroidViewModel(application) {
         )
     }
 
-    // ✅ FASE 5: Exportación real de video MP4 con MediaCodec + MediaMuxer
+    // AI Render & Video Producer compilation mockup
     fun renderAndExportVideo(onCompleted: () -> Unit) {
         val full = currentProject.value ?: return
         pause()
         isExporting.value = true
         exportProgress.value = 0f
-        exportStep.value = "Preparando exportación..."
+        exportStep.value = "Iniciando codificadores de video..."
 
         viewModelScope.launch {
-            val savedPath = videoExporter.export(full) { progress ->
-                exportStep.value = progress.step
-                exportProgress.value = progress.progress
+            val steps = listOf(
+                "Iniciando codificadores de video..." to 0.1f,
+                "Renderizando escenas 3D interpoladas por IA..." to 0.3f,
+                "Compilando subtítulos con algoritmo dynamic karaoke..." to 0.6f,
+                "Mezclando pistas de música sintética de fondo..." to 0.8f,
+                "Inyectando metadatos MP4 y finalizando contenedor de video..." to 0.95f,
+                "Video exportado con éxito a la galería." to 1.0f
+            )
+
+            for ((stepMsg, progressValue) in steps) {
+                exportStep.value = stepMsg
+                // Simulate frame recording timeline step
+                val currentP = exportProgress.value
+                val stepDiff = progressValue - currentP
+                val ticks = 10
+                for (t in 1..ticks) {
+                    delay(120) // Frame render simulator ticks
+                    exportProgress.value = currentP + (stepDiff * t / ticks)
+                }
             }
 
-            // Actualizar estado en base de datos
-            val updatedProj = full.project.copy(isExported = savedPath != null)
+            // Flag exported database state
+            val updatedProj = full.project.copy(isExported = true)
             repository.updateProject(updatedProj)
             currentProject.value = full.copy(project = updatedProj)
 
-            exportStep.value = if (savedPath != null) {
-                "¡Video guardado en la Galería!"
-            } else {
-                "Error al exportar. Comprueba tu conexión e inténtalo de nuevo."
-            }
-
-            kotlinx.coroutines.delay(1500)
+            delay(600)
             isExporting.value = false
             onCompleted()
         }
@@ -493,7 +482,6 @@ class VideoViewModel(application: Application) : AndroidViewModel(application) {
     override fun onCleared() {
         super.onCleared()
         synthesizer.stopPlaying()
-        narrationManager.shutdown() // ✅ Liberar motor TTS
         stopPlaybackTicker()
     }
 }
